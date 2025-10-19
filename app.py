@@ -7,6 +7,7 @@ from collections import Counter
 import re
 import statsmodels.api as sm
 from io import BytesIO
+import requests
 
 # Custom styling with markdown
 st.markdown(
@@ -83,23 +84,22 @@ if password != "napster2025":
     st.error("❌ Incorrect password. Access denied.")
     st.stop()
 
-# Load data
-st.markdown('<div class="stHeader">Napster Scrum Intelligence Dashboard 🌟</div>', unsafe_allow_html=True)
-uploaded_file = st.file_uploader("📤 Upload Transcripts CSV", type="csv")
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-else:
-    st.warning("⚠️ Using provided transcript data.")
-    csv_data = st.text_area("📋 Paste CSV Data Here", value="""paste the full CSV text""", height=200)
-    if csv_data:
-        df = pd.read_csv(BytesIO(csv_data.encode()))
-    else:
-        sample_data = {
-            'date': ['2025-09-14'] * 10 + ['2025-09-15'] * 5 + ['2025-10-14'] * 10,
-            'team_member': ['Edo Segal', 'maryna.soroka@napster.com'] * 5 + ['kautik.mistry@napster.com'] * 5 + ['gselvanayagam@napster.com'] * 5 + ['tobin.mathew@napster.com'] * 5,
-            'discussion_with_edo': ["Welcome! This is a quick 15-minute structured check-in...", "Haido, yes, I'm repeating that this is a test only, so...", "you may discard it from your memory.", "For the test's sake, yes, I've confirmed the rules and...", "It's all clear, clear now.", "Got it, the roles are now clear. What have you been able to accomplish last week?", "Last week, we were able to Create a lot of updates to the scrum tool...", "To your email and the email is the email subject is.", "Clear that it's about the blockers", "The view summary button appears at the very end..."] * 2
-        }
-        df = pd.DataFrame(sample_data)
+# Fetch data from GitHub
+github_url = "https://raw.githubusercontent.com/yourusername/yourrepository/main/yourfile.csv"  # Replace with your raw CSV URL
+try:
+    response = requests.get(github_url)
+    response.raise_for_status()  # Raise an error for bad status codes
+    df = pd.read_csv(BytesIO(response.content))
+except requests.exceptions.RequestException as e:
+    st.error("❌ Failed to fetch data from GitHub. Please check the URL or network connection.")
+    # Fallback to sample data if GitHub fetch fails
+    st.warning("⚠️ Using sample data as fallback.")
+    sample_data = {
+        'date': ['2025-09-14'] * 10 + ['2025-09-15'] * 5 + ['2025-10-14'] * 10,
+        'team_member': ['Edo Segal', 'maryna.soroka@napster.com'] * 5 + ['kautik.mistry@napster.com'] * 5 + ['gselvanayagam@napster.com'] * 5 + ['tobin.mathew@napster.com'] * 5,
+        'discussion_with_edo': ["Welcome! This is a quick 15-minute structured check-in...", "Haido, yes, I'm repeating that this is a test only, so...", "you may discard it from your memory.", "For the test's sake, yes, I've confirmed the rules and...", "It's all clear, clear now.", "Got it, the roles are now clear. What have you been able to accomplish last week?", "Last week, we were able to Create a lot of updates to the scrum tool...", "To your email and the email is the email subject is.", "Clear that it's about the blockers", "The view summary button appears at the very end..."] * 2
+    }
+    df = pd.DataFrame(sample_data)
 
 df = df.groupby(['date', 'team_member'])['discussion_with_edo'].apply(' '.join).reset_index()
 df['date'] = pd.to_datetime(df['date'])
@@ -130,6 +130,7 @@ if filter_member != "All":
     filtered_df = filtered_df[filtered_df['team_member'] == filter_member]
 
 # KPI Section
+st.markdown('<div class="stHeader">Napster Scrum Intelligence Dashboard 🌟</div>', unsafe_allow_html=True)
 st.markdown('<div class="stSubheader">📊 Key Metrics</div>', unsafe_allow_html=True)
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 overall_health = round(filtered_df['sentiment_score'].mean() * 100, 1)
@@ -217,7 +218,7 @@ positive_texts = filtered_df[filtered_df['sentiment_label'] == 'Positive']['summ
 for t in positive_texts[:3]:
     st.success(t)
 
-# Moved Critical Alerts & Blockers here
+# Critical Alerts & Blockers
 st.markdown('### Critical Alerts & Blockers 🚨')
 blockers = filtered_df[filtered_df['discussion_with_edo'].str.contains('blocker', case=False)]
 for idx, row in blockers.iterrows():
