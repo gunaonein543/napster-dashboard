@@ -164,12 +164,6 @@ with col6:
     st.metric("Team Morale", team_morale)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Critical Alerts & Blockers
-st.markdown('<div class="stSubheader">🚨 Critical Alerts & Blockers</div>', unsafe_allow_html=True)
-blockers = filtered_df[filtered_df['discussion_with_edo'].str.contains('blocker', case=False)]
-for idx, row in blockers.iterrows():
-    st.warning(f"[{row['team_member']}] 🔧 Blocker: {row['summary']}")
-
 # Technology & Project Focus
 st.markdown('<div class="stSubheader">💻 Technology & Project Focus</div>', unsafe_allow_html=True)
 tech_keywords = {'react': 0, 'typescript': 0, 'nodejs': 0, 'graphql': 0, 'azure': 0, 'oracle': 0, 'migration': 0, 'ai': 0}
@@ -222,6 +216,12 @@ st.markdown('### Positive Trends 🌱')
 positive_texts = filtered_df[filtered_df['sentiment_label'] == 'Positive']['summary'].tolist()
 for t in positive_texts[:3]:
     st.success(t)
+
+# Moved Critical Alerts & Blockers here
+st.markdown('### Critical Alerts & Blockers 🚨')
+blockers = filtered_df[filtered_df['discussion_with_edo'].str.contains('blocker', case=False)]
+for idx, row in blockers.iterrows():
+    st.warning(f"[{row['team_member']}] 🔧 Blocker: {row['summary']}")
 
 st.markdown('### Areas of Concern ⚠️')
 negative_texts = filtered_df[filtered_df['sentiment_label'] == 'Negative']['summary'].tolist()
