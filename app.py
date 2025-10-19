@@ -85,7 +85,7 @@ if password != "napster2025":
     st.stop()
 
 # Fetch data from GitHub
-github_url = "https://github.com/gunaonein543/napster-dashboard/blob/main/edo_meeting_cleaned%20(1).csv"  # Replace with your raw CSV URL
+github_url = "https://raw.githubusercontent.com/gunaonein543/napster-dashboard/refs/heads/main/edo_meeting_cleaned%20(1).csv"  # Replace with your raw CSV URL
 try:
     response = requests.get(github_url)
     response.raise_for_status()  # Raise an error for bad status codes
@@ -294,4 +294,5 @@ if any(filtered_df['sentiment_label'] == 'Negative'):
     st.warning("🚨 Negative sentiment detected - Consider scheduling a team check-in.")
 
 st.info("📱 This dashboard is mobile-responsive. For live voice-to-text, integrate speech_recognition library in production.")
+
 
