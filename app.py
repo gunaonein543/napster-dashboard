@@ -80,7 +80,10 @@ def get_actions(text):
 # Password protection
 st.sidebar.title("🔒 Login")
 password = st.sidebar.text_input("Enter Password", type="password")
-if password != "napster2025":
+if not password:
+    st.warning("Please enter your password to access the dashboard.")
+    st.stop()
+elif password != "napster2025":
     st.error("❌ Incorrect password. Access denied.")
     st.stop()
 
@@ -294,5 +297,6 @@ if any(filtered_df['sentiment_label'] == 'Negative'):
     st.warning("🚨 Negative sentiment detected - Consider scheduling a team check-in.")
 
 st.info("📱 This dashboard is mobile-responsive. For live voice-to-text, integrate speech_recognition library in production.")
+
 
 
